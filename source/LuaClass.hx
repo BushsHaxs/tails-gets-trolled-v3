@@ -90,7 +90,7 @@ class LuaClass {
   };
 
 
-  private static function index(l:StatePointer):Int{
+  public static function index(l:StatePointer):Int{
     var l = state;
     var index = Lua.tostring(l,-1);
     if(Lua.getmetatable(l,-2)!=0){
@@ -112,7 +112,7 @@ class LuaClass {
     return 0;
   }
 
-  private static function newindex(l:StatePointer):Int{
+  public static function newindex(l:StatePointer):Int{
     var l = state;
     var index = Lua.tostring(l,2);
     if(Lua.getmetatable(l,1)!=0){
@@ -1595,7 +1595,7 @@ class LuaShaderClass extends LuaClass {
       return 0;
   }
 
-  private static function setProperty(l:StatePointer):Int{
+  public static function setProperty(l:StatePointer):Int{
     // 1 = self
     // 2 = property
     // 3 = value
