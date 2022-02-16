@@ -249,7 +249,7 @@ class LuaSprite extends LuaClass {
       Lua.pushstring(l,Reflect.getProperty(sprite,Lua.tostring(l,2)));
       return 1;
   }
-
+    }	
     if(stage.foreground.members.contains(sprite))
       stage.foreground.remove(sprite);
     }
