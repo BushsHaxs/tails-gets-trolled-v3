@@ -90,28 +90,6 @@ class LuaClass {
   };
 
 
-  public static function index(l:StatePointer):Int{
-    var l = state;
-    var index = Lua.tostring(l,-1);
-    if(Lua.getmetatable(l,-2)!=0){
-      var mtIdx = Lua.gettop(l);
-      Lua.pushstring(l,index + "PropertyData");
-      Lua.rawget(l,mtIdx);
-      var data:Any = Convert.fromLua(l,-1);
-      if(data!=null){
-        Lua.pushstring(l,"_CLASSNAME");
-        Lua.rawget(l,mtIdx);
-        var clName = Lua.tostring(l,-1);
-        if(LuaStorage.objectProperties[clName]!=null && LuaStorage.objectProperties[clName][index]!=null){
-          return LuaStorage.objectProperties[clName][index].getter(l,data);
-        }
-      };
-    }else{
-      // TODO: throw an error!
-    };
-    return 0;
-  }
-
   public static function newindex(l:StatePointer):Int{
     var l = state;
     var index = Lua.tostring(l,2);
@@ -1049,43 +1027,6 @@ class LuaCam extends LuaClass {
       return 1;
   }
 
-  private static function shake(l:StatePointer):Int{
-    var intensity = .05;
-    var duration = .5;
-    var force = true;
-
-    if(Lua.isnumber(state,2) )
-      intensity=Lua.tonumber(state,2);
-
-    if(Lua.isnumber(state,3) )
-      duration=Lua.tonumber(state,3);
-
-    if(Lua.isboolean(state,4) )
-      force=Lua.isboolean(state,4);
-
-    Lua.getfield(state,1,"className");
-    var objName = Lua.tostring(state,-1);
-    var cam = PlayState.currentPState.luaObjects[objName];
-    cam.shake(intensity,duration,null,force);
-    return 0;
-  }
-
-  private static function addShaders(l:StatePointer):Int{
-    // 1 = self
-    // 2 = table of shaders
-    var stuff = Convert.fromLua(state,2);
-
-    return 0;
-  }
-
-  private static function delShaders(l:StatePointer):Int{
-    // 1 = self
-    // 2 = table of shaders
-    var stuff = Convert.fromLua(state,2);
-
-    return 0;
-  }
-
   private static var shakeC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(shake);
   private static var addShadersC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(addShaders);
 
@@ -1437,66 +1378,6 @@ class LuaCharacter extends LuaSprite {
   }
   private static var swapCharacterC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(swapCharacter);
 
-  private static function addOffset(l:StatePointer){
-      // 1 = self
-      // 2 = name
-      // 3 = offsetX
-      // 4 = offsetY
-      var name:String = LuaL.checkstring(state,2);
-      var offsetX:Float = LuaL.checknumber(state,3);
-      var offsetY:Float = LuaL.checknumber(state,4);
-      Lua.getfield(state,1,"spriteName");
-      var spriteName = Lua.tostring(state,-1);
-      var sprite = PlayState.currentPState.luaSprites[spriteName];
-      sprite.addOffset(name,offsetX,offsetY);
-      return 0;
-  }
-
-  private static function playAnim(l:StatePointer):Int{
-    // 1 = self
-    // 2 = anim
-    // 3 = forced
-    // 4 = reversed
-    // 5 = frame
-    var anim = LuaL.checkstring(state,2);
-    var forced = false;
-    var reversed = false;
-    var frame:Int = 0;
-
-    if(Lua.isboolean(state,3))
-      forced = Lua.toboolean(state,3);
-
-    if(Lua.isboolean(state,4))
-      reversed = Lua.toboolean(state,4);
-
-    if(Lua.isnumber(state,5))
-      frame = Std.int(Lua.tonumber(state,5));
-
-    Lua.getfield(state,1,"spriteName");
-    var spriteName = Lua.tostring(state,-1);
-    var sprite = PlayState.currentPState.luaSprites[spriteName];
-    sprite.playAnim(anim,forced,reversed,frame);
-    return 0;
-  }
-
-  private static function leftToRight(l:StatePointer){
-    // 1 = self
-    Lua.getfield(state,1,"spriteName");
-    var spriteName = Lua.tostring(state,-1);
-    var sprite = PlayState.currentPState.luaSprites[spriteName];
-    sprite.leftToRight();
-    return 0;
-  }
-
-  private static function rightToLeft(l:StatePointer){
-    // 1 = self
-    Lua.getfield(state,1,"spriteName");
-    var spriteName = Lua.tostring(state,-1);
-    var sprite = PlayState.currentPState.luaSprites[spriteName];
-    sprite.rightToLeft();
-    return 0;
-  }
-
   private static var playAnimC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(playAnim);
   private static var addOffsetC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(addOffset);
   private static var leftToRightC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(leftToRight);
@@ -1593,20 +1474,6 @@ class LuaShaderClass extends LuaClass {
       }
       //Reflect.setProperty(effect,Lua.tostring(l,2),Lua.tonumber(l,3));
       return 0;
-  }
-
-  public static function setProperty(l:StatePointer):Int{
-    // 1 = self
-    // 2 = property
-    // 3 = value
-    var property = LuaL.checkstring(state,2);
-    var value = Convert.fromLua(state,3);
-    Lua.getfield(state,1,"className");
-    var name = Lua.tostring(state,-1);
-    var shader = PlayState.currentPState.luaObjects[name];
-    //Reflect.setProperty(shader,property,value);
-
-    return 1;
   }
 
   private static var setvarC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(setProperty);
@@ -1802,143 +1669,6 @@ class LuaModMgr extends LuaClass {
 
   private static var setScaleYC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(setScaleY);
   */
-
-  private static function queueEase(l:StatePointer):Int{
-    // 1 = self
-    // 2 = step
-    // 3 = endStep
-    // 4 = modName
-    // 5 = percent
-    // 6 = easing style
-    // 7 = player
-    var step = LuaL.checknumber(state,2);
-    var eStep = LuaL.checknumber(state,3);
-    var modN = LuaL.checkstring(state,4);
-    var perc = LuaL.checknumber(state,5);
-    var ease = LuaL.checkstring(state,6);
-    var player:Int = -1;
-
-    if(Lua.isnumber(state,7))
-      player = Std.int(Lua.tonumber(state,7));
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    try{
-      mgr.queueEase(step,eStep,modN,perc,ease,player);
-    }catch(e){
-      trace(e.stack,e.message);
-    }
-    return 0;
-  }
-
-  private static var queueEaseC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(queueEase);
-
-  private static function queueEaseL(l:StatePointer):Int{
-    // 1 = self
-    // 2 = step
-    // 3 = len
-    // 4 = modName
-    // 5 = percent
-    // 6 = easing style
-    // 7 = player
-    var step = LuaL.checknumber(state,2);
-    var len = LuaL.checknumber(state,3);
-    var modN = LuaL.checkstring(state,4);
-    var perc = LuaL.checknumber(state,5);
-    var ease = LuaL.checkstring(state,6);
-    var player:Int = -1;
-
-    if(Lua.isnumber(state,7))
-      player = Std.int(Lua.tonumber(state,7));
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    try{
-      mgr.queueEaseL(step,len,modN,perc,ease,player);
-    }catch(e){
-      trace(e.stack,e.message);
-    }
-    return 0;
-  }
-
-  private static var queueEaseLC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(queueEaseL);
-
-  private static function queueSet(l:StatePointer):Int{
-    // 1 = self
-    // 2 = step
-    // 3 = modName
-    // 4 = percent
-    // 5 = player
-    var step = LuaL.checknumber(state,2);
-    var modN = LuaL.checkstring(state,3);
-    var perc = LuaL.checknumber(state,4);
-    var player:Int = -1;
-
-    if(Lua.isnumber(state,5))
-      player = Std.int(Lua.tonumber(state,5));
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    mgr.queueSet(step,modN,perc,player);
-    return 0;
-  }
-  private static var queueSetC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(queueSet);
-
-  private static function set(l:StatePointer):Int{
-    // 1 = self
-    // 2 = modName
-    // 3 = percent
-    // 4 = player
-    var modN = LuaL.checkstring(state,2);
-    var perc = LuaL.checknumber(state,3);
-    var player:Int = -1;
-
-    if(Lua.isnumber(state,4))
-      player = Std.int(Lua.tonumber(state,4));
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    mgr.set(modN,perc,player);
-    return 0;
-  }
-  private static var setC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(set);
-
-  private static function get(l:StatePointer):Int{
-    // 1 = self
-    // 2 = modName
-    // 3 = player
-    var modN = LuaL.checkstring(state,2);
-    var player:Int = -1;
-
-    if(Lua.isnumber(state,3))
-      player = Std.int(Lua.tonumber(state,3));
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    Lua.pushnumber(state,mgr.getModPercent(modN,player));
-    return 1;
-  }
-  private static var getC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(get);
-
-  private static function addBlank(l:StatePointer):Int{
-    // 1 = self
-    // 2 = mod name
-    var modN = LuaL.checkstring(state,2);
-
-    Lua.getfield(state,1,"className");
-    var className = Lua.tostring(state,-1);
-    var mgr = PlayState.currentPState.luaObjects[className];
-    mgr.defineBlankMod(modN);
-    trace(modN);
-    return 0;
-  }
-  private static var addBlankC:cpp.Callable<StatePointer->Int> = cpp.Callable.fromStaticFunction(addBlank);
-
 
   public function new(mgr:ModManager,?name="modMgr",?addToGlobal=true){
     super();
