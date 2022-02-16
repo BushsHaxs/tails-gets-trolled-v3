@@ -250,21 +250,21 @@ class LuaSprite extends LuaClass {
       return 1;
   }
 
-    if(stage.foreground.members.contains(sprite)){
+    if(stage.foreground.members.contains(sprite))
       stage.foreground.remove(sprite);
     }
 
-    if(stage.overlay.members.contains(sprite)){
+    if(stage.overlay.members.contains(sprite))
       stage.overlay.remove(sprite);
     }
 
     for(shit in layers){
-      if(stage.layers.get(shit).members.contains(sprite)){
+      if(stage.layers.get(shit).members.contains(sprite))
         stage.layers.get(shit).remove(sprite);
       }
     }
 
-    switch(layer){
+    switch(layer)
       case 'dad' | 'boyfriend' | 'gf':
         stage.layers.get(layer).add(sprite);
       case 'foreground':
@@ -278,7 +278,7 @@ class LuaSprite extends LuaClass {
     return 0;
 
   }
-  public function new(sprite:FlxSprite,name:String,?addToGlobal:Bool=true){
+  public function new(sprite:FlxSprite,name:String,?addToGlobal:Bool=true)
     super();
     className=name;
     this.addToGlobal=addToGlobal;
