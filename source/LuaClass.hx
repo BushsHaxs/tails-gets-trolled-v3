@@ -40,7 +40,6 @@ class LuaStorage {
 
 class LuaClass {
   public var properties:Map<String,LuaProperty> = [];
-  public var methods:Map<String,cpp.Callable<StatePointer->Int> > = [];
   public var className:String = "BaseClass";
   private static var state:State;
   public var addToGlobal:Bool=true;
@@ -1594,17 +1593,6 @@ class LuaShaderClass extends LuaClass {
       }
       //Reflect.setProperty(effect,Lua.tostring(l,2),Lua.tonumber(l,3));
       return 0;
-  }
-
-  private static function getProperty(l:StatePointer):Int{
-    // 1 = self
-    // 2 = property
-    var property = LuaL.checkstring(state,2);
-    Lua.getfield(state,1,"className");
-    var name = Lua.tostring(state,-1);
-    var shader = PlayState.currentPState.luaObjects[name];
-    //Convert.toLua(state,Reflect.getProperty(shader,property));
-    return 1;
   }
 
   private static function setProperty(l:StatePointer):Int{
